@@ -1,0 +1,5 @@
+<resources>
+    <!-- 应用名称：在这里修改 app_name 即可 -->
+    <string name="app_name">鸡</string>
+    <string name="center_image_desc">中间小图片</string>
+</resources>
