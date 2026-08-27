@@ -11,7 +11,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode 1
-        versionName "1.0.2"
+        versionName "1.0.3"
     }
 
     buildTypes {
@@ -21,12 +21,14 @@ android {
         }
     }
 
+    // 【改动1】升级 Java 编译版本到 17（或 11，根据你实际 JDK 选）
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
 dependencies {
-    // 这里不使用 AndroidX，只用系统 Activity，所以不需要额外依赖
+    // 【改动2】添加 AndroidX AppCompat 依赖（因为要继承 AppCompatActivity）
+    implementation 'androidx.appcompat:appcompat:1.7.0'
 }

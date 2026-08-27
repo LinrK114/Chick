@@ -1,6 +1,6 @@
 package com.example.customclickapp;
 
-import android.app.Activity;
+import androidx.appcompat.app.AppCompatActivity;   // 【改动1】导入 AndroidX 的 AppCompatActivity
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
@@ -13,7 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {   // 【改动2】继承改为 AppCompatActivity
 
     private ImageView centerImage;
     private SoundPool soundPool;
@@ -112,10 +112,10 @@ public class MainActivity extends Activity {
 
         this.soundCacheFile = cacheFile;
 
-       AudioAttributes audioAttributes = new AudioAttributes.Builder()
-        .setUsage(AudioAttributes.USAGE_MEDIA)
-        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-        .build();
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build();
 
         soundPool = new SoundPool.Builder()
                 .setMaxStreams(1)
