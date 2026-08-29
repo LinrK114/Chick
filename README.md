@@ -4,8 +4,10 @@
 
 这是windows版
 
-仅支持windows10+和64位架构  
+仅支持windows10&ge;和64位架构  
 
 需要安装.net10  
 
 不知道说啥了🧐  
+
+用Visual Studio打开  
