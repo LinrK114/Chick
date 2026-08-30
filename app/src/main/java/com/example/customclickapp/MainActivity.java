@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {   // 【改动2】继承�
                 .build();
 
         soundPool = new SoundPool.Builder()
-                .setMaxStreams(1)
+                .setMaxStreams(50)
                 .setAudioAttributes(audioAttributes)
                 .build();
 

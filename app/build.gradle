@@ -4,14 +4,14 @@ plugins {
 
 android {
     namespace 'com.example.customclickapp'
-    compileSdk 36
+    compileSdk 37
 
     defaultConfig {
         applicationId "com.example.customclickapp"
         minSdk 26
-        targetSdk 36
+        targetSdk 37
         versionCode 1
-        versionName "1.0.3"
+        versionName "1.0.4"
     }
 
     buildTypes {
