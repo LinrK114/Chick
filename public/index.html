@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="/assets/your-favicon.ico" type="image/x-icon" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chick</title>
+    <link rel="icon" href="data:," />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-family: system-ui, sans-serif;
+        }
+        .click-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s ease;
+        }
+        .click-area img {
+            width: 120px;
+            height: auto;
+            display: block;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .click-area:hover img {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+        }
+        .click-area.active img {
+            transform: scale(0.88);
+            filter: brightness(0.92) saturate(1.2);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        }
+        .hint {
+            margin-top: 20px;
+            font-size: 15px;
+            color: #888;
+            letter-spacing: 0.5px;
+        }
+        @media (max-width: 480px) {
+            .click-area img { width: 90px; }
+            .hint { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="click-area" id="clickArea" role="button" tabindex="0">
+        <img src="/assets/icon.png" alt="点击图片" id="clickImage" />
+    </div>
+    <script>
+        (function() {
+            const clickArea = document.getElementById('clickArea');
+
+            function handleClick(e) {
+                clickArea.classList.add('active');
+                // 每次点击创建新的 Audio 实例，实现叠加播放
+                const newAudio = new Audio('/assets/click-sound.mp3');
+                newAudio.play().catch(() => {});
+                clearTimeout(window._clickTimer);
+                window._clickTimer = setTimeout(() => {
+                    clickArea.classList.remove('active');
+                }, 200);
+            }
+
+            clickArea.addEventListener('click', handleClick);
+            clickArea.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleClick(e);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
