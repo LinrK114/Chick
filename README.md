@@ -3,10 +3,9 @@
 # Chick 🐔
 
 依旧点击发出鸡叫🤫
+试玩:https://chick.novaray.ccwu.cc
 
-我服务器崩了下周可能开放试玩入口  
-
-这是Web版  
+这是Web版 
 
 需运行npm install express  
 
