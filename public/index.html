@@ -52,9 +52,24 @@
             .click-area img { width: 90px; }
             .hint { font-size: 13px; }
         }
+        /*github入口*/
+.top-right-img {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: auto;
+    z-index: 999;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
     </style>
 </head>
 <body>
+    <a href="https://github.com/LinrK114/Chick/tree/Web/" target="_blank" rel="noopener noreferrer">
+    <img src="/assets/top-right.png" alt="github入口" class="top-right-img" />
+</a>
     <div class="click-area" id="clickArea" role="button" tabindex="0">
         <img src="/assets/icon.png" alt="点击图片" id="clickImage" />
     </div>
