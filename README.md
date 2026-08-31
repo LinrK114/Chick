@@ -3,7 +3,8 @@
 # Chick 🐔
 
 依旧点击发出鸡叫🤫
-试玩:https://chick.novaray.ccwu.cc
+
+试玩:https://chick.novaray.ccwu.cc  
 
 这是Web版 
 
