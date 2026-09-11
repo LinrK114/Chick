@@ -1,4 +1,4 @@
-<img src="https://picui.ogmua.cn/s1/2026/08/26/6a8ed8873cff4.webp" alt="center_image.png" width="64" height="64">
+<img src="https://picui.ogmua.cn/s1/20260911/4dc579d3028929cb50f11f4bc62c5b3c.png" alt="center_image.png" width="64" height="64">
 
 # Chick 🐔
 
