@@ -30,7 +30,23 @@
 
 - Gradle要求9.7.1  
 
-- AGP(AndroidGradlePlugin)要求9.3.2  
+- AGP(AndroidGradlePlugin)要求9.3.2
+
+# 构建命令 
+- Windows:  
+
+```batch
+gradle build
+```
+
+- 以上命令为普通构建会,进行静态检查和Lint检查,时间会略微长如需追求极致优化请运行普通构建然后前往/app/build/reports/lint-results-debug.html，如需
+跳过请运行:
+
+- Windows:
+
+```batch
+gradle assembleDebug
+```
 
 # 测试情况 
 
