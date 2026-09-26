@@ -54,7 +54,7 @@ gradle assembleDebug
 
 - Android16 通过
 
-- Android17 未测试
+- Android17 通过
 
 > [!CAUTION]
 > 此测试报告仅供参考请以实际运行状态为准
