@@ -3,28 +3,28 @@ plugins {
 }
 
 android {
-    namespace 'com.example.customclickapp'
-    compileSdk 37
+    namespace = 'com.example.customclickapp'
+    compileSdk = 37
 
     defaultConfig {
-        applicationId "com.example.customclickapp"
-        minSdk 26
-        targetSdk 37
-        versionCode 1
-        versionName "1.0.4"
+        applicationId = "com.example.customclickapp"
+        minSdk = 26
+        targetSdk = 37
+        versionCode = 1
+        versionName = "1.0.6"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
     // 【改动1】升级 Java 编译版本到 17（或 11，根据你实际 JDK 选）
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
