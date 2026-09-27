@@ -42,7 +42,8 @@ npm install express
 
 # 端口 
 
-默认开放在1111端口修改请前往server.js  
+- 默认开放在1111端口修改请前往server.js  
 
 # 其他分支 
+
 - 这个分支为Web其他分支分别为Android,Windows如需请切换  
