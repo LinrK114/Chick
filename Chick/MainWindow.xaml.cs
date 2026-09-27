@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 
@@ -60,6 +61,27 @@ namespace Chick   // 如果你的命名空间不同，请改成你的实际命�
                     player.MediaEnded += (sender, args) => _semaphore?.Release();
                     _mediaPlayers.Add(player);
                 }
+
+                // ---------- 预热音频管道 ----------
+                // 等待 MediaPlayer 完成初步加载
+                await Task.Delay(200);
+
+                // 静音播放一次，激活解码器
+                foreach (var player in _mediaPlayers)
+                {
+                    player.Volume = 0;
+                    player.Play();
+                }
+
+                // 短暂播放后暂停并复位
+                await Task.Delay(100);
+                foreach (var player in _mediaPlayers)
+                {
+                    player.Pause();
+                    player.PlaybackSession.Position = TimeSpan.Zero;
+                    player.Volume = 1.0;
+                }
+                // ---------- 预热结束 ----------
             }
             catch
             {
