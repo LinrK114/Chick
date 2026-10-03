@@ -38,4 +38,4 @@ dotnet publish Chick.csproj -c Release -r win-x64 --self-contained true -p:Publi
 
 # 其他分支 
 
-- 这个分支为Web其他分支分别为Android,Windows如需请切换
+- 这个分支为Windows其他分支分别为Android,Web如需请切换
