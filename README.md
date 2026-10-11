@@ -28,7 +28,7 @@
 
 # 构建 
 
-- Gradle要求9.8.0    
+- Gradle要求9.8.1    
 
 - AGP(AndroidGradlePlugin)要求9.4.0-alpha04  
 
