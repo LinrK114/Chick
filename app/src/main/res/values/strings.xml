@@ -1,5 +1,29 @@
 <resources>
-    <!-- 应用名称：在这里修改 app_name 即可 -->
-    <string name="app_name">鸡</string>
+    <string name="app_name">Chick</string>
     <string name="center_image_desc">中间小图片</string>
+
+    <string name="theme_toggle">切换主题</string>
+    <string name="about">关于</string>
+    <string name="back">返回</string>
+
+    <string name="about_source_code">1.0.9</string>
+    <string name="about_developer">开发</string>
+    <string name="about_license">开源许可</string>
+    <string name="about_check_update">检查更新</string>
+
+    <string name="dialog_jump_title">跳转</string>
+    <string name="dialog_jump_message">是否跳转至 GitHub 作者主页？</string>
+    <string name="dialog_yes">是</string>
+    <string name="dialog_no">否</string>
+
+    <string name="checking_update">正在检查更新…</string>
+    <string name="already_latest">已是最新版本</string>
+    <string name="check_update_failed">检查更新失败</string>
+    <string name="update_found_title">发现更新</string>
+    <string name="update_start">开始更新</string>
+    <string name="update_cancel">取消</string>
+    <string name="downloading">正在下载…</string>
+    <string name="download_failed">下载失败</string>
+    <string name="install_permission_title">需要安装权限</string>
+    <string name="install_permission_message">请允许安装未知来源应用</string>
 </resources>

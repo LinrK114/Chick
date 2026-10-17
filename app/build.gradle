@@ -11,7 +11,7 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0.8"
+        versionName = "1.0.9"
     }
 
     buildTypes {
@@ -31,4 +31,7 @@ android {
 dependencies {
     // 【改动2】添加 AndroidX AppCompat 依赖（因为要继承 AppCompatActivity）
     implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.13.0'
+    implementation 'io.noties.markwon:core:4.6.2'
+    implementation 'io.noties.markwon:linkify:4.6.2' 
 }

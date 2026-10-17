@@ -1,39 +1,52 @@
 package com.example.customclickapp;
 
-import androidx.appcompat.app.AppCompatActivity;   // 【改动1】导入 AndroidX 的 AppCompatActivity
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MainActivity extends AppCompatActivity {   // 【改动2】继承改为 AppCompatActivity
+public class MainActivity extends AppCompatActivity {
+
+    private static final String PREFS = "app_prefs";
+    private static final String KEY_NIGHT_MODE = "night_mode";
 
     private ImageView centerImage;
+    private ImageButton btnTheme;
+    private ImageButton btnAbout;
+
     private SoundPool soundPool;
     private int soundId = -1;
     private boolean soundLoaded = false;
-    private File soundCacheFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        applySavedNightMode();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         centerImage = findViewById(R.id.centerImage);
+        btnTheme = findViewById(R.id.btnTheme);
+        btnAbout = findViewById(R.id.btnAbout);
 
-        // 先加载自定义图片和音效
         loadCenterImage();
         prepareSound();
+        updateThemeIcon();
 
         centerImage.setOnClickListener(v -> {
-            // 1. 视觉反馈：快速缩小再弹回
             v.animate()
                     .scaleX(0.85f)
                     .scaleY(0.85f)
@@ -44,17 +57,60 @@ public class MainActivity extends AppCompatActivity {   // 【改动2】继承�
                             .setDuration(80)
                             .start())
                     .start();
-
-            // 2. 播放音效
             playClickSound();
+        });
+
+        btnTheme.setOnClickListener(v -> toggleTheme());
+
+        btnAbout.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+            startActivity(intent);
         });
     }
 
-    /**
-     * 从 assets 加载中间小图片。
-     * 支持 center_image.png / jpg / jpeg / webp
-     * 如果都没有，就保留布局中的默认矢量图。
-     */
+    private void applySavedNightMode() {
+        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        int mode = prefs.getInt(KEY_NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        AppCompatDelegate.setDefaultNightMode(mode);
+    }
+
+    private void toggleTheme() {
+        int current = getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+
+        int newMode;
+        if (current == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+            newMode = AppCompatDelegate.MODE_NIGHT_NO;
+        } else {
+            newMode = AppCompatDelegate.MODE_NIGHT_YES;
+        }
+
+        getSharedPreferences(PREFS, MODE_PRIVATE)
+                .edit()
+                .putInt(KEY_NIGHT_MODE, newMode)
+                .apply();
+
+        AppCompatDelegate.setDefaultNightMode(newMode);
+        recreate();
+    }
+
+    private void updateThemeIcon() {
+        int current = getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+
+        if (current == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+            btnTheme.setImageResource(R.drawable.ic_brightness_2);
+        } else {
+            btnTheme.setImageResource(R.drawable.ic_wb_sunny);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateThemeIcon();
+    }
+
     private void loadCenterImage() {
         String[] candidates = {
                 "center_image.png",
@@ -71,16 +127,10 @@ public class MainActivity extends AppCompatActivity {   // 【改动2】继承�
                 }
                 return;
             } catch (IOException ignored) {
-                // 尝试下一个文件名
             }
         }
     }
 
-    /**
-     * 从 assets 复制音效到缓存，然后用 SoundPool 加载。
-     * 支持 click_sound.mp3 / ogg / wav
-     * 如果都没有，点击时只有视觉反馈，不会报错。
-     */
     private void prepareSound() {
         String[] candidates = {
                 "click_sound.mp3",
@@ -100,17 +150,15 @@ public class MainActivity extends AppCompatActivity {   // 【改动2】继承�
                 while ((length = is.read(buffer)) != -1) {
                     os.write(buffer, 0, length);
                 }
-                break; // 复制成功，停止尝试
+                break;
             } catch (IOException e) {
                 cacheFile = null;
             }
         }
 
         if (cacheFile == null || !cacheFile.exists()) {
-            return; // 没有可用音效
+            return;
         }
-
-        this.soundCacheFile = cacheFile;
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -118,7 +166,7 @@ public class MainActivity extends AppCompatActivity {   // 【改动2】继承�
                 .build();
 
         soundPool = new SoundPool.Builder()
-                .setMaxStreams(50)
+                .setMaxStreams(16)
                 .setAudioAttributes(audioAttributes)
                 .build();
 

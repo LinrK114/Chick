@@ -1,7 +1,5 @@
 <resources>
-    <!-- 无标题，白色背景 -->
-    <!-- 【改动】父主题从 Material 改为 AppCompat -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:statusBarColor">@android:color/white</item>
         <item name="android:windowLightStatusBar">true</item>

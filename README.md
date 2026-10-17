@@ -30,7 +30,7 @@
 
 - Gradle要求9.8.1    
 
-- AGP(AndroidGradlePlugin)要求9.4.0-alpha04  
+- AGP(AndroidGradlePlugin)要求9.5.0-alpha10  
 
 # 构建命令 
 - Windows:  
