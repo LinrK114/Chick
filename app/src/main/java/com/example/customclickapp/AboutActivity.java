@@ -22,12 +22,14 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -39,12 +41,14 @@ public class AboutActivity extends AppCompatActivity {
 
     private static final String VERSION_URL = "https://ota.novaray.ccwu.cc/version.txt";
     private static final String NOTE_URL = "https://ota.novaray.ccwu.cc/note.md";
+    private static final String SHA_URL = "https://ota.novaray.ccwu.cc/sha.txt";
     private static final String APK_URL = "https://ota.novaray.ccwu.cc/chick_latest.apk";
     private static final String GITHUB_URL = "https://github.com/LinrK114/";
 
     private TextView tvUpdateStatus;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private File pendingApk = null;
+    private String pendingSha = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,9 +150,27 @@ public class AboutActivity extends AppCompatActivity {
                 return;
             }
 
-            // 第三步：弹窗
+            // 第三步：请求 sha.txt
+            String sha;
+            try {
+                sha = extractSha(httpGet(SHA_URL));
+                android.util.Log.d("AboutActivity", "SHA ok, value=" + sha);
+                if (sha.length() != 64) {
+                    throw new IOException("sha.txt 格式不正确，长度=" + sha.length());
+                }
+            } catch (Exception e) {
+                android.util.Log.e("AboutActivity", "SHA failed: " + SHA_URL, e);
+                String msg = "sha.txt 失败\n" + describeException(e);
+                runOnUiThread(() -> tvUpdateStatus.setText(
+                        getString(R.string.check_update_failed) + "\n" + msg));
+                return;
+            }
+
+            // 第四步：弹窗
+            final String finalSha = sha;
             runOnUiThread(() -> {
                 tvUpdateStatus.setVisibility(View.GONE);
+                pendingSha = finalSha;
                 showUpdateDialog(note);
             });
         });
@@ -158,6 +180,24 @@ public class AboutActivity extends AppCompatActivity {
         String name = e.getClass().getSimpleName();
         String msg = e.getMessage() == null ? "" : e.getMessage();
         return name + ": " + msg;
+    }
+
+    private String extractSha(String raw) {
+        if (raw == null) return "";
+        // 兼容 "abc...123  chick_latest.apk" 这种 sha256sum 输出
+        String[] lines = raw.split("\\r?\\n");
+        for (String line : lines) {
+            String[] tokens = line.trim().split("\\s+");
+            for (String t : tokens) {
+                String clean = t.replaceAll("[^0-9a-fA-F]", "");
+                if (clean.length() == 64) {
+                    return clean.toLowerCase();
+                }
+            }
+        }
+        // 整段里找 64 位 hex
+        String clean = raw.replaceAll("[^0-9a-fA-F]", "");
+        return clean.toLowerCase();
     }
 
     private void showUpdateDialog(String noteMd) {
@@ -211,11 +251,18 @@ public class AboutActivity extends AppCompatActivity {
 
         File dir = getExternalFilesDir(null);
         if (dir == null) dir = getCacheDir();
-        File apkFile = new File(dir, "chick_latest.apk");
+        final File apkFile = new File(dir, "chick_latest.apk");
         android.util.Log.d("AboutActivity", "apk dest=" + apkFile.getAbsolutePath());
+
+        // 重新下载时先删旧文件
+        if (apkFile.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            apkFile.delete();
+        }
 
         executor.execute(() -> {
             try {
+                // 下载阶段：更新百分比
                 downloadFile(APK_URL, apkFile, p -> runOnUiThread(() -> {
                     if (p < 0) {
                         percent.setText("下载中…");
@@ -225,11 +272,61 @@ public class AboutActivity extends AppCompatActivity {
                     }
                 }));
 
+                // 下载完成，进入校验阶段
+                runOnUiThread(() -> {
+                    progress.setIndeterminate(true);
+                    percent.setText("校验中…");
+                });
+
+                String actualSha;
+                try {
+                    actualSha = sha256(apkFile);
+                } catch (Exception e) {
+                    android.util.Log.e("AboutActivity", "sha256 compute failed", e);
+                    String err = e.getMessage() == null ? e.toString() : e.getMessage();
+                    runOnUiThread(() -> {
+                        dialog.dismiss();
+                        new MaterialAlertDialogBuilder(this)
+                                .setTitle("校验失败")
+                                .setMessage("无法计算文件哈希：\n" + err)
+                                .setPositiveButton("是", (d, w) -> startDownloadApk())
+                                .setNegativeButton("否", null)
+                                .show();
+                    });
+                    return;
+                }
+
+                boolean ok = pendingSha != null
+                        && pendingSha.length() == 64
+                        && actualSha.equalsIgnoreCase(pendingSha);
+
+                if (!ok) {
+                    android.util.Log.e("AboutActivity",
+                            "SHA mismatch: expected=" + pendingSha + " actual=" + actualSha);
+                    final String expected = pendingSha == null ? "" : pendingSha;
+                    runOnUiThread(() -> {
+                        dialog.dismiss();
+                        new MaterialAlertDialogBuilder(this)
+                                .setTitle("校验失败")
+                                .setMessage("下载的安装包与服务器哈希不一致。\n\n"
+                                        + "期望: " + expected + "\n"
+                                        + "实际: " + actualSha + "\n\n"
+                                        + "是否重新下载？")
+                                .setPositiveButton("是", (d, w) -> startDownloadApk())
+                                .setNegativeButton("否", null)
+                                .show();
+                    });
+                    return;
+                }
+
+                // 校验成功
+                android.util.Log.d("AboutActivity", "SHA verified: " + actualSha);
                 runOnUiThread(() -> {
                     dialog.dismiss();
                     pendingApk = apkFile;
                     tryInstallApk();
                 });
+
             } catch (Exception e) {
                 android.util.Log.e("AboutActivity", "download failed", e);
                 String msg = e.getMessage() == null ? e.toString() : e.getMessage();
@@ -243,6 +340,23 @@ public class AboutActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private String sha256(File file) throws Exception {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        try (InputStream in = new FileInputStream(file)) {
+            byte[] buf = new byte[8192];
+            int len;
+            while ((len = in.read(buf)) != -1) {
+                md.update(buf, 0, len);
+            }
+        }
+        byte[] digest = md.digest();
+        StringBuilder sb = new StringBuilder(digest.length * 2);
+        for (byte b : digest) {
+            sb.append(String.format("%02x", b & 0xff));
+        }
+        return sb.toString();
     }
 
     private void tryInstallApk() {
