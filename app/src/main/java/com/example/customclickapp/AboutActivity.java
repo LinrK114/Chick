@@ -1,6 +1,7 @@
 package com.example.customclickapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -45,6 +47,9 @@ public class AboutActivity extends AppCompatActivity {
     private static final String APK_URL = "https://ota.novaray.ccwu.cc/chick_latest.apk";
     private static final String GITHUB_URL = "https://github.com/LinrK114/";
 
+    private static final String PREFS = "app_prefs";
+    private static final String KEY_COUNT = "click_count";
+
     private TextView tvUpdateStatus;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private File pendingApk = null;
@@ -64,8 +69,22 @@ public class AboutActivity extends AppCompatActivity {
         findViewById(R.id.rowLicense).setOnClickListener(v ->
                 startActivity(new Intent(this, LicenseActivity.class)));
         findViewById(R.id.rowUpdate).setOnClickListener(v -> checkForUpdate());
+        findViewById(R.id.rowClearCount).setOnClickListener(v -> showClearCountDialog());
 
         loadAboutImage();
+    }
+
+    private void showClearCountDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.clear_count_title)
+                .setMessage(R.string.clear_count_message)
+                .setPositiveButton(R.string.confirm, (d, w) -> {
+                    SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+                    prefs.edit().putInt(KEY_COUNT, 0).apply();
+                    Toast.makeText(this, R.string.count_cleared, Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     private void loadAboutImage() {
@@ -75,7 +94,6 @@ public class AboutActivity extends AppCompatActivity {
                 ((ImageView) findViewById(R.id.aboutImage)).setImageBitmap(bmp);
             }
         } catch (Exception ignored) {
-            // 没有就保留布局里的默认图
         }
     }
 
@@ -96,7 +114,6 @@ public class AboutActivity extends AppCompatActivity {
         tvUpdateStatus.setText(R.string.checking_update);
 
         executor.execute(() -> {
-            // 第一步：请求 version.txt
             String serverVersion;
             try {
                 long start = System.currentTimeMillis();
@@ -134,7 +151,6 @@ public class AboutActivity extends AppCompatActivity {
                 return;
             }
 
-            // 第二步：请求 note.md
             String note;
             try {
                 long start = System.currentTimeMillis();
@@ -150,7 +166,6 @@ public class AboutActivity extends AppCompatActivity {
                 return;
             }
 
-            // 第三步：请求 sha.txt
             String sha;
             try {
                 sha = extractSha(httpGet(SHA_URL));
@@ -166,7 +181,6 @@ public class AboutActivity extends AppCompatActivity {
                 return;
             }
 
-            // 第四步：弹窗
             final String finalSha = sha;
             runOnUiThread(() -> {
                 tvUpdateStatus.setVisibility(View.GONE);
@@ -184,20 +198,15 @@ public class AboutActivity extends AppCompatActivity {
 
     private String extractSha(String raw) {
         if (raw == null) return "";
-        // 兼容 "abc...123  chick_latest.apk" 这种 sha256sum 输出
-        String[] lines = raw.split("\\r?\\n");
-        for (String line : lines) {
-            String[] tokens = line.trim().split("\\s+");
-            for (String t : tokens) {
-                String clean = t.replaceAll("[^0-9a-fA-F]", "");
-                if (clean.length() == 64) {
-                    return clean.toLowerCase();
-                }
-            }
+        String s = raw.replace("\uFEFF", "").trim();
+        if (s.matches("[0-9a-fA-F]{64}")) {
+            return s.toLowerCase();
         }
-        // 整段里找 64 位 hex
-        String clean = raw.replaceAll("[^0-9a-fA-F]", "");
-        return clean.toLowerCase();
+        Matcher m = Pattern.compile("[0-9a-fA-F]{64}").matcher(s);
+        if (m.find()) {
+            return m.group().toLowerCase();
+        }
+        return "";
     }
 
     private void showUpdateDialog(String noteMd) {
@@ -254,15 +263,12 @@ public class AboutActivity extends AppCompatActivity {
         final File apkFile = new File(dir, "chick_latest.apk");
         android.util.Log.d("AboutActivity", "apk dest=" + apkFile.getAbsolutePath());
 
-        // 重新下载时先删旧文件
         if (apkFile.exists()) {
-            //noinspection ResultOfMethodCallIgnored
             apkFile.delete();
         }
 
         executor.execute(() -> {
             try {
-                // 下载阶段：更新百分比
                 downloadFile(APK_URL, apkFile, p -> runOnUiThread(() -> {
                     if (p < 0) {
                         percent.setText("下载中…");
@@ -272,7 +278,6 @@ public class AboutActivity extends AppCompatActivity {
                     }
                 }));
 
-                // 下载完成，进入校验阶段
                 runOnUiThread(() -> {
                     progress.setIndeterminate(true);
                     percent.setText("校验中…");
@@ -319,7 +324,6 @@ public class AboutActivity extends AppCompatActivity {
                     return;
                 }
 
-                // 校验成功
                 android.util.Log.d("AboutActivity", "SHA verified: " + actualSha);
                 runOnUiThread(() -> {
                     dialog.dismiss();
@@ -403,7 +407,7 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     interface ProgressCallback {
-        void onProgress(int percent); // -1 表示未知总大小
+        void onProgress(int percent);
     }
 
     private void downloadFile(String urlStr, File dest, ProgressCallback cb) throws Exception {
@@ -531,7 +535,6 @@ public class AboutActivity extends AppCompatActivity {
                     throw new IOException("HTTP " + code);
                 }
 
-                // 从 Content-Type 解析 charset
                 String charset = "UTF-8";
                 String contentType = conn.getContentType();
                 if (contentType != null) {
@@ -560,7 +563,6 @@ public class AboutActivity extends AppCompatActivity {
                     data = bo.toByteArray();
                 }
 
-                // 去掉 UTF-8 BOM
                 if (data.length >= 3 &&
                         (data[0] & 0xFF) == 0xEF &&
                         (data[1] & 0xFF) == 0xBB &&

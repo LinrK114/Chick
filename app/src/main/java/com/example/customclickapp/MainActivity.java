@@ -2,13 +2,16 @@ package com.example.customclickapp;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -22,14 +25,19 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String PREFS = "app_prefs";
     private static final String KEY_NIGHT_MODE = "night_mode";
+    private static final String KEY_COUNT = "click_count";
+    private static final int MAX_COUNT = 999;
 
     private ImageView centerImage;
     private ImageButton btnTheme;
     private ImageButton btnAbout;
+    private TextView tvCount;
 
     private SoundPool soundPool;
     private int soundId = -1;
     private boolean soundLoaded = false;
+
+    private int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
         centerImage = findViewById(R.id.centerImage);
         btnTheme = findViewById(R.id.btnTheme);
         btnAbout = findViewById(R.id.btnAbout);
+        tvCount = findViewById(R.id.tvCount);
 
+        loadCount();
         loadCenterImage();
         prepareSound();
         updateThemeIcon();
@@ -57,7 +67,9 @@ public class MainActivity extends AppCompatActivity {
                             .setDuration(80)
                             .start())
                     .start();
+
             playClickSound();
+            increaseCount();
         });
 
         btnTheme.setOnClickListener(v -> toggleTheme());
@@ -68,6 +80,33 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void loadCount() {
+        count = getSharedPreferences(PREFS, MODE_PRIVATE).getInt(KEY_COUNT, 0);
+        if (count < 0) count = 0;
+        if (count > MAX_COUNT) count = MAX_COUNT;
+        updateCountDisplay();
+    }
+
+    private void increaseCount() {
+        if (count >= MAX_COUNT) return;
+        count++;
+        getSharedPreferences(PREFS, MODE_PRIVATE)
+                .edit()
+                .putInt(KEY_COUNT, count)
+                .apply();
+        updateCountDisplay();
+    }
+
+    private void updateCountDisplay() {
+        if (tvCount == null) return;
+        tvCount.setText(String.valueOf(count));
+
+        int nightMode = getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
+        boolean isNight = nightMode == Configuration.UI_MODE_NIGHT_YES;
+        tvCount.setTextColor(isNight ? Color.WHITE : Color.BLACK);
+    }
+
     private void applySavedNightMode() {
         SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
         int mode = prefs.getInt(KEY_NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
@@ -76,10 +115,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void toggleTheme() {
         int current = getResources().getConfiguration().uiMode
-                & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+                & Configuration.UI_MODE_NIGHT_MASK;
 
         int newMode;
-        if (current == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+        if (current == Configuration.UI_MODE_NIGHT_YES) {
             newMode = AppCompatDelegate.MODE_NIGHT_NO;
         } else {
             newMode = AppCompatDelegate.MODE_NIGHT_YES;
@@ -96,9 +135,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateThemeIcon() {
         int current = getResources().getConfiguration().uiMode
-                & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+                & Configuration.UI_MODE_NIGHT_MASK;
 
-        if (current == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+        if (current == Configuration.UI_MODE_NIGHT_YES) {
             btnTheme.setImageResource(R.drawable.ic_brightness_2);
         } else {
             btnTheme.setImageResource(R.drawable.ic_wb_sunny);
@@ -109,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateThemeIcon();
+        loadCount();
     }
 
     private void loadCenterImage() {

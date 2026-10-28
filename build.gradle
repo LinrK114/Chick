@@ -1,4 +1,4 @@
 // 项目级构建文件
 plugins {
-    id 'com.android.application' version '9.5.0-alpha10' apply false
+    id 'com.android.application' version '9.6.0-alpha01' apply false
 }

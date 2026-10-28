@@ -23,6 +23,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- 顶部图片 -->
             <ImageView
                 android:id="@+id/aboutImage"
                 android:layout_width="120dp"
@@ -33,6 +34,7 @@
                 android:scaleType="fitCenter"
                 android:src="@drawable/center_image_default" />
 
+            <!-- 顶部图片下方文字 -->
             <TextView
                 android:id="@+id/aboutImageCaption"
                 android:layout_width="wrap_content"
@@ -54,6 +56,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
+                    <!-- 开发：圆形 PNG 头像 + 文字 -->
                     <LinearLayout
                         android:id="@+id/rowDeveloper"
                         android:layout_width="match_parent"
@@ -63,11 +66,13 @@
                         android:orientation="horizontal"
                         android:padding="16dp">
 
-                        <ImageView
+                        <com.google.android.material.imageview.ShapeableImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:contentDescription="@string/about_developer"
-                            android:src="@drawable/about_avatar" />
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/about_avatar"
+                            app:shapeAppearanceOverlay="@style/CircleImage" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -83,6 +88,7 @@
                         android:layout_height="1dp"
                         android:background="?attr/colorOutlineVariant" />
 
+                    <!-- 开源许可 -->
                     <LinearLayout
                         android:id="@+id/rowLicense"
                         android:layout_width="match_parent"
@@ -113,6 +119,7 @@
                         android:layout_height="1dp"
                         android:background="?attr/colorOutlineVariant" />
 
+                    <!-- 检查更新 -->
                     <LinearLayout
                         android:id="@+id/rowUpdate"
                         android:layout_width="match_parent"
@@ -136,6 +143,75 @@
                             android:layout_weight="1"
                             android:text="@string/about_check_update"
                             android:textAppearance="?attr/textAppearanceBodyLarge" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?attr/colorOutlineVariant" />
+
+                    <!-- 清除计数 -->
+                    <LinearLayout
+                        android:id="@+id/rowClearCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="8dp"
+                            android:contentDescription="@string/clear_count"
+                            android:src="@drawable/ic_delete" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="24dp"
+                            android:layout_weight="1"
+                            android:text="@string/clear_count"
+                            android:textAppearance="?attr/textAppearanceBodyLarge" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?attr/colorOutlineVariant" />
+
+                    <!-- 构建日期：不可点击 -->
+                    <LinearLayout
+                        android:id="@+id/rowBuildDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="8dp"
+                            android:contentDescription="@string/build_date"
+                            android:src="@drawable/ic_build" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="24dp"
+                            android:layout_weight="1"
+                            android:text="@string/build_date"
+                            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                        <TextView
+                            android:id="@+id/tvBuildDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/build_date_value"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?android:attr/textColorSecondary" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

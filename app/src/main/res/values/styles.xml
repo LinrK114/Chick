@@ -1,7 +1,14 @@
 <resources>
+    <!-- 日间主题：Material 3 浅色，无标题栏，白色背景 -->
     <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:statusBarColor">@android:color/white</item>
         <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- 圆形头像样式，供 ShapeableImageView 使用 -->
+    <style name="CircleImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 </resources>
